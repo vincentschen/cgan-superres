@@ -326,7 +326,7 @@ def _discriminator_model(sess, features, disc_input):
     mapsize = 3
     layers  = [64, 128, 256, 512]
 
-    old_vars = tf.all_variables()
+    old_vars = tf.global_variables()
 
     model = Model('DIS', 2*disc_input - 1)
 
@@ -352,7 +352,7 @@ def _discriminator_model(sess, features, disc_input):
     model.add_conv2d(1, mapsize=1, stride=1, stddev_factor=stddev_factor)
     model.add_mean()
 
-    new_vars  = tf.all_variables()
+    new_vars  = tf.global_variables()
     disc_vars = list(set(new_vars) - set(old_vars))
 
     return model.get_output(), disc_vars
@@ -363,7 +363,7 @@ def _generator_model(sess, features, labels, channels):
     mapsize = 3
     res_units  = [256, 128, 96]
 
-    old_vars = tf.all_variables()
+    old_vars = tf.global_variables()
 
     # See Arxiv 1603.05027
     model = Model('GEN', features)
@@ -396,7 +396,7 @@ def _generator_model(sess, features, labels, channels):
     model.add_conv2d(channels, mapsize=1, stride=1, stddev_factor=1.)
     model.add_sigmoid()
     
-    new_vars  = tf.all_variables()
+    new_vars  = tf.global_variables()
     gene_vars = list(set(new_vars) - set(old_vars))
 
     return model.get_output(), gene_vars
@@ -449,7 +449,7 @@ def _downscale(images, K):
 
 def create_generator_loss(disc_output, gene_output, features):
     # I.e. did we fool the discriminator?
-    cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(disc_output, tf.ones_like(disc_output))
+    cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=disc_output, labels=tf.ones_like(disc_output))
     gene_ce_loss  = tf.reduce_mean(cross_entropy, name='gene_ce_loss')
 
     # I.e. does the result look like the feature?
@@ -466,10 +466,10 @@ def create_generator_loss(disc_output, gene_output, features):
 
 def create_discriminator_loss(disc_real_output, disc_fake_output):
     # I.e. did we correctly identify the input as real or not?
-    cross_entropy_real = tf.nn.sigmoid_cross_entropy_with_logits(disc_real_output, tf.ones_like(disc_real_output))
+    cross_entropy_real = tf.nn.sigmoid_cross_entropy_with_logits(logits=disc_real_output, labels=tf.ones_like(disc_real_output))
     disc_real_loss     = tf.reduce_mean(cross_entropy_real, name='disc_real_loss')
     
-    cross_entropy_fake = tf.nn.sigmoid_cross_entropy_with_logits(disc_fake_output, tf.zeros_like(disc_fake_output))
+    cross_entropy_fake = tf.nn.sigmoid_cross_entropy_with_logits(logits=disc_fake_output, labels=tf.zeros_like(disc_fake_output))
     disc_fake_loss     = tf.reduce_mean(cross_entropy_fake, name='disc_fake_loss')
 
     return disc_real_loss, disc_fake_loss

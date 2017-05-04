@@ -62,7 +62,7 @@ def _save_checkpoint(train_data, batch):
 def train_model(train_data):
     td = train_data
 
-    summaries = tf.merge_all_summaries()
+    summaries = tf.summary.merge_all()
     td.sess.run(tf.initialize_all_variables())
 
     lrval       = FLAGS.learning_rate_start
