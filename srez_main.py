@@ -49,7 +49,11 @@ tf.app.flags.DEFINE_bool('log_device_placement', False,
 tf.app.flags.DEFINE_integer('sample_size', 64,
                             "Image sample size in pixels. Range [64,128]")
 
+<<<<<<< HEAD
 tf.app.flags.DEFINE_integer('summary_period', 10,
+=======
+tf.app.flags.DEFINE_integer('summary_period', 20,
+>>>>>>> 93a22f00418659fcec645784ce50a987ea7fee17
                             "Number of batches between summary data dumps")
 
 tf.app.flags.DEFINE_integer('random_seed', 0,

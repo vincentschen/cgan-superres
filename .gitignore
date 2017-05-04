@@ -5,3 +5,4 @@ train*/
 .env/
 .DS_Store
 .gitignore
+toy_dataset/
