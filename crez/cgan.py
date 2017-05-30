@@ -1,10 +1,7 @@
 
 # coding: utf-8
 
-# ## Setup
-
-# In[5]:
-
+# In[ ]:
 
 from __future__ import print_function, division
 import tensorflow as tf
@@ -50,10 +47,7 @@ def get_session():
 
 # ## Dataset
 
-# ### MNIST
-
-# In[6]:
-
+# In[ ]:
 
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('./cs231n/datasets/MNIST_data', one_hot=True) # include one-hot labels
@@ -62,116 +56,112 @@ mnist = input_data.read_data_sets('./cs231n/datasets/MNIST_data', one_hot=True) 
 show_images(mnist.train.next_batch(16)[0])
 
 
-# In[7]:
+# ## Helpers
 
+# In[ ]:
 
 def leaky_relu(x, alpha=0.01):
     """Compute the leaky ReLU activation function.
-    
+
     Inputs:
     - x: TensorFlow Tensor with arbitrary shape
     - alpha: leak parameter for leaky ReLU
-    
+
     Returns:
     TensorFlow Tensor with the same shape as x
     """
     return tf.maximum(x, alpha*x)
 
 
-# In[8]:
-
+# In[ ]:
 
 def sample_noise(batch_size, dim):
     """Generate random uniform noise from -1 to 1.
-    
+
     Inputs:
     - batch_size: integer giving the batch size of noise to generate
     - dim: integer giving the dimension of the the noise to generate
-    
+
     Returns:
     TensorFlow Tensor containing uniform noise in [-1, 1] with shape [batch_size, dim]
     """
     return tf.random_uniform((batch_size, dim), minval=-1, maxval=1)
-    
 
 
-# In[9]:
-
+# In[ ]:
 
 def get_solvers(learning_rate=1e-3, beta1=0.5):
     """Create solvers for GAN training.
-    
+
     Inputs:
     - learning_rate: learning rate to use for both solvers
     - beta1: beta1 parameter for both solvers (first moment decay)
-    
+
     Returns:
     - D_solver: instance of tf.train.AdamOptimizer with correct learning_rate and beta1
     - G_solver: instance of tf.train.AdamOptimizer with correct learning_rate and beta1
     """
-    
+
     D_solver = tf.train.AdamOptimizer(learning_rate=learning_rate, beta1=beta1)
     G_solver = tf.train.AdamOptimizer(learning_rate=learning_rate, beta1=beta1)
-    
+
     return D_solver, G_solver
 
 
-# In[12]:
-
+# In[ ]:
 
 def discriminator(x, y):
     """Compute discriminator score for a batch of input images.
-    
+
     Inputs:
     - x: TensorFlow Tensor of flattened input images, shape [batch_size, 784]
-    
+
     Returns:
-    TensorFlow Tensor with shape [batch_size, 1], containing the score 
+    TensorFlow Tensor with shape [batch_size, 1], containing the score
     for an image being real for each input image.
     """
     with tf.variable_scope("discriminator"):
         inputs = tf.concat(values=[x, y], axis=1)
-        
+
         fc1 = tf.layers.dense(inputs=inputs, units=256, activation=leaky_relu)
         fc2 = tf.layers.dense(inputs=fc1, units=256, activation=leaky_relu)
         logits = tf.layers.dense(inputs=fc2, units=1, activation=None)
         return logits
-    
+
 def generator(z, y):
     """Generate images from a random noise vector.
-    
+
     Inputs:
     - z: TensorFlow Tensor of random noise with shape [batch_size, noise_dim]
-    
+
     Returns:
     TensorFlow Tensor of generated images, with shape [batch_size, 784].
     """
     with tf.variable_scope("generator"):
         inputs = tf.concat(values=[z, y], axis=1)
-        
+
         fc1 = tf.layers.dense(inputs=inputs, units=1024, activation=tf.nn.relu)
         fc2 = tf.layers.dense(inputs=fc1, units=1024, activation=tf.nn.relu)
         img = tf.layers.dense(inputs=fc2, units=784, activation=tf.nn.tanh)
         return img
 
 
-# In[14]:
-
+# In[ ]:
 
 def gan_loss(logits_real, logits_fake):
     """Compute the GAN loss.
-    
+
     Inputs:
     - logits_real: Tensor, shape [batch_size, 1], output of discriminator
         Log probability that the image is real for each real image
     - logits_fake: Tensor, shape[batch_size, 1], output of discriminator
         Log probability that the image is real for each fake image
-    
+
     Returns:
     - D_loss: discriminator loss scalar
     - G_loss: generator loss scalar
-    """    
-    D_real_labels = tf.ones_like(logits_real)    
+    """
+    D_real_labels = tf.ones_like(logits_real)
     D_real_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=D_real_labels, logits=logits_real)
     D_false_labels = tf.zeros_like(logits_fake)
     D_fake_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=D_false_labels, logits=logits_fake)
@@ -179,18 +169,16 @@ def gan_loss(logits_real, logits_fake):
 
     G_false_labels = tf.ones_like(logits_fake)
     G_fake_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=G_false_labels, logits=logits_fake)
-    G_loss = tf.reduce_mean(G_fake_loss) 
-   
+    G_loss = tf.reduce_mean(G_fake_loss)
+
     return D_loss, G_loss
 
 
-# In[10]:
+# In[ ]:
 
-
-# a giant helper function
 def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_extra_step,              show_every=250, print_every=50, batch_size=128, num_epoch=10):
     """Train a GAN for a certain number of epochs.
-    
+
     Inputs:
     - sess: A tf.Session that we want to use to run our data
     - G_train_step: A training step for the Generator
@@ -208,10 +196,10 @@ def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_
         # every show often, show a sample result
         if it % show_every == 0:
             num_samples = 16
-            
+
             y_sample = np.zeros(shape=[batch_size, num_labels])
             y_sample[:, 5] = 1 # condition on class=5
-            
+
             samples = sess.run(G_sample, feed_dict={y:y_sample})
             fig = show_images(samples[:num_samples])
             plt.show()
@@ -226,7 +214,7 @@ def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_
         if it % print_every == 0:
             print('Iter: {}, D: {:.4}, G:{:.4}'.format(it,D_loss_curr,G_loss_curr))
     print('Final images')
-    
+
     y_sample = np.zeros(shape=[batch_size, num_labels])
     y_sample[:, 5] = 1 # condition on class=5
     samples = sess.run(G_sample, feed_dict={y:y_sample})
@@ -235,8 +223,9 @@ def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_
     plt.show()
 
 
-# In[15]:
+# ## Build graph
 
+# In[ ]:
 
 tf.reset_default_graph()
 
@@ -268,7 +257,7 @@ with tf.variable_scope("") as scope:
 
 # Get the list of variables for the discriminator and generator
 D_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'discriminator')
-G_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'generator') 
+G_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'generator')
 
 # get our solver
 D_solver, G_solver = get_solvers()
@@ -283,8 +272,7 @@ D_extra_step = tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'discriminator')
 G_extra_step = tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'generator')
 
 
-# In[16]:
-
+# In[ ]:
 
 with get_session() as sess:
     sess.run(tf.global_variables_initializer())
