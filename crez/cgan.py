@@ -3,6 +3,7 @@
 
 # In[ ]:
 
+
 from __future__ import print_function, division
 import tensorflow as tf
 import numpy as np
@@ -18,7 +19,7 @@ plt.rcParams['image.cmap'] = 'gray'
 def show_images(images):
     sqrtn = int(np.ceil(np.sqrt(images.shape[0])))
     sqrtimg = int(np.ceil(np.sqrt(images.shape[1])))
-
+    
     fig = plt.figure(figsize=(sqrtn, sqrtn))
     gs = gridspec.GridSpec(sqrtn, sqrtn)
     gs.update(wspace=0.05, hspace=0.05)
@@ -49,16 +50,24 @@ def get_session():
 
 # In[ ]:
 
+
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets('./cs231n/datasets/MNIST_data', one_hot=True) # include one-hot labels
+mnist = input_data.read_data_sets('./datasets/MNIST_data', one_hot=True) # include one-hot labels
 
 # show a batch
 show_images(mnist.train.next_batch(16)[0])
 
 
+# In[ ]:
+
+
+
+
+
 # ## Helpers
 
 # In[ ]:
+
 
 def leaky_relu(x, alpha=0.01):
     """Compute the leaky ReLU activation function.
@@ -75,6 +84,7 @@ def leaky_relu(x, alpha=0.01):
 
 # In[ ]:
 
+
 def sample_noise(batch_size, dim):
     """Generate random uniform noise from -1 to 1.
 
@@ -89,6 +99,7 @@ def sample_noise(batch_size, dim):
 
 
 # In[ ]:
+
 
 def get_solvers(learning_rate=1e-3, beta1=0.5):
     """Create solvers for GAN training.
@@ -109,6 +120,7 @@ def get_solvers(learning_rate=1e-3, beta1=0.5):
 
 
 # In[ ]:
+
 
 def discriminator(x, y):
     """Compute discriminator score for a batch of input images.
@@ -148,6 +160,7 @@ def generator(z, y):
 
 # In[ ]:
 
+
 def gan_loss(logits_real, logits_fake):
     """Compute the GAN loss.
 
@@ -175,6 +188,7 @@ def gan_loss(logits_real, logits_fake):
 
 
 # In[ ]:
+
 
 def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_extra_step,              show_every=250, print_every=50, batch_size=128, num_epoch=10):
     """Train a GAN for a certain number of epochs.
@@ -227,6 +241,7 @@ def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_
 
 # In[ ]:
 
+
 tf.reset_default_graph()
 
 # number of images for each batch
@@ -273,6 +288,7 @@ G_extra_step = tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'generator')
 
 
 # In[ ]:
+
 
 with get_session() as sess:
     sess.run(tf.global_variables_initializer())
