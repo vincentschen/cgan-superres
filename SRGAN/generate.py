@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 import sugartensor as tf
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
+
+
 
 __author__ = 'buriburisuri@gmail.com'
 
@@ -25,7 +30,7 @@ data = tf.sg_data.Mnist(batch_size=batch_size)
 x = data.train.image
 
 # corrupted image
-x_small = tf.image.resize_bicubic(x, (14, 14))
+x_small = tf.image.resize_bicubic(x, (7, 7))
 x_bicubic = tf.image.resize_bicubic(x_small, (28, 28)).sg_squeeze()
 x_nearest = tf.image.resize_images(x_small, (28, 28), tf.image.ResizeMethod.NEAREST_NEIGHBOR).sg_squeeze()
 
@@ -42,7 +47,7 @@ with tf.sg_context(name='generator', act='relu', bn=True):
            .sg_conv(dim=32)
            .sg_conv()
            .sg_conv(dim=4, act='sigmoid', bn=False)
-           .sg_periodic_shuffle(factor=2)
+           .sg_periodic_shuffle(factor=4)
            .sg_squeeze())
 
 #
@@ -57,7 +62,7 @@ with tf.Session() as sess:
 
         # restore parameters
         saver = tf.train.Saver()
-        saver.restore(sess, tf.train.latest_checkpoint('asset/train/ckpt'))
+        saver.restore(sess, tf.train.latest_checkpoint('asset/train'))
 
         # run generator
         gt, low, bicubic, sr = sess.run([x.sg_squeeze(), x_nearest, x_bicubic, gen])
