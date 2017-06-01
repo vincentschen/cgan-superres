@@ -1,8 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
-
+# In[1]:
 
 from __future__ import print_function, division
 import tensorflow as tf
@@ -48,26 +47,170 @@ def get_session():
 
 # ## Dataset
 
-# In[ ]:
+# In[2]:
+
+# from tensorflow.examples.tutorials.mnist import input_data
+# mnist = input_data.read_data_sets('./datasets/MNIST_data', one_hot=True) # include one-hot labels
+
+# # show a batch
+# show_images(mnist.train.next_batch(16)[0])
 
 
-from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets('./datasets/MNIST_data', one_hot=True) # include one-hot labels
+# In[3]:
 
-# show a batch
-show_images(mnist.train.next_batch(16)[0])
+tfrecords_filename = './datasets/celeba/celeba_train.tfrecords'
 
 
-# In[ ]:
+# In[4]:
+
+reconstructed_images = []
+
+record_iterator = tf.python_io.tf_record_iterator(path=tfrecords_filename)
+
+for string_record in record_iterator:
+    
+    example = tf.train.Example()
+    example.ParseFromString(string_record)
+    
+    height = int(example.features.feature['height']
+                                 .int64_list
+                                 .value[0])
+    
+    width = int(example.features.feature['width']
+                                .int64_list
+                                .value[0])
+    
+    height = (example.features.feature['height']
+                                  .int64_list
+                                  .value[0])
+
+    img_string = (example.features.feature['image_raw']
+                                .bytes_list
+                                .value[0])
+    
+    img_1d = np.fromstring(img_string, dtype=np.uint8)
+    reconstructed_img = img_1d.reshape((height, width, -1))
+    
+#     annotation_1d = np.fromstring(annotation_string, dtype=np.uint8)
+    
+    # Annotations don't have depth (3rd dimension)
+#     reconstructed_annotation = annotation_1d.reshape((height, width))
+    
+#     reconstructed_images.append((reconstructed_img, reconstructed_annotation))
+    reconstructed_images.append(reconstructed_img)
+
+    
+# Let's check if reconstructed images match
+for reconstructed in reconstructed_images[:5]:
+    plt.imshow(reconstructed)
+    plt.show()
 
 
+# In[5]:
 
+import skimage.io as io
+
+IMAGE_HEIGHT = 384
+IMAGE_WIDTH = 384
+
+
+def read_and_decode(filename_queue):
+    
+    reader = tf.TFRecordReader()
+
+    _, serialized_example = reader.read(filename_queue)
+
+    features = tf.parse_single_example(
+      serialized_example,
+      # Defaults are not specified since both keys are required.
+      features={
+        'height': tf.FixedLenFeature([], tf.int64),
+        'width': tf.FixedLenFeature([], tf.int64),
+        'depth': tf.FixedLenFeature([], tf.int64),
+        'image_raw': tf.FixedLenFeature([], tf.string)
+        })
+
+    # Convert from a scalar string tensor (whose single string has
+    # length mnist.IMAGE_PIXELS) to a uint8 tensor with shape
+    # [mnist.IMAGE_PIXELS].
+    image = tf.decode_raw(features['image_raw'], tf.uint8)
+#     annotation = tf.decode_raw(features['mask_raw'], tf.uint8)
+    
+    height = tf.cast(features['height'], tf.int32)
+    width = tf.cast(features['width'], tf.int32)
+    
+    image_shape = tf.stack([height, width, 3])
+#     annotation_shape = tf.stack([height, width, 1])
+    
+    image = tf.reshape(image, image_shape)
+#     annotation = tf.reshape(annotation, annotation_shape)
+    
+    image_size_const = tf.constant((IMAGE_HEIGHT, IMAGE_WIDTH, 3), dtype=tf.int32)
+#     annotation_size_const = tf.constant((IMAGE_HEIGHT, IMAGE_WIDTH, 1), dtype=tf.int32)
+    
+    # Random transformations can be put here: right before you crop images
+    # to predefined size. To get more information look at the stackoverflow
+    # question linked above.
+    
+    resized_image = tf.image.resize_image_with_crop_or_pad(image=image,
+                                           target_height=IMAGE_HEIGHT,
+                                           target_width=IMAGE_WIDTH)
+    
+#     resized_annotation = tf.image.resize_image_with_crop_or_pad(image=annotation,
+#                                            target_height=IMAGE_HEIGHT,
+#                                            target_width=IMAGE_WIDTH)
+    
+    
+#     images, annotations = tf.train.shuffle_batch( [resized_image, resized_annotation],
+#                                                  batch_size=2,
+#                                                  capacity=30,
+#                                                  num_threads=2,
+#                                                  min_after_dequeue=10)
+    images = tf.train.shuffle_batch( [resized_image],
+                                                 batch_size=2,
+                                                 capacity=30,
+                                                 num_threads=2,
+                                                 min_after_dequeue=10)
+    annotations = None
+    
+    return images, annotations
+
+
+# In[6]:
+
+filename_queue = tf.train.string_input_producer(
+    [tfrecords_filename], num_epochs=10)
+
+# Even when reading in multiple threads, share the filename
+# queue.
+image, annotation = read_and_decode(filename_queue)
+
+# The op for initializing the variables.
+init_op = tf.group(tf.global_variables_initializer(),
+                   tf.local_variables_initializer())
+
+with tf.Session()  as sess:
+    
+    sess.run(init_op)
+    
+    coord = tf.train.Coordinator()
+    threads = tf.train.start_queue_runners(coord=coord)
+    
+    # Let's read off 3 batches just for example
+    for i in range(3):
+    
+        img = sess.run(image)
+        io.imshow(img[0, :, :, :])
+        io.show()
+        
+    
+    coord.request_stop()
+    coord.join(threads)
 
 
 # ## Helpers
 
 # In[ ]:
-
 
 def leaky_relu(x, alpha=0.01):
     """Compute the leaky ReLU activation function.
@@ -84,7 +227,6 @@ def leaky_relu(x, alpha=0.01):
 
 # In[ ]:
 
-
 def sample_noise(batch_size, dim):
     """Generate random uniform noise from -1 to 1.
 
@@ -100,6 +242,24 @@ def sample_noise(batch_size, dim):
 
 # In[ ]:
 
+def downsampled_img(batch_size, img):
+    """Downsample image
+    
+    Inputs:
+    - batch_size: integer giving the batch size
+    - img: input image
+    
+    Returns:
+    TensorFlow Tensor of downsized img
+    """
+    # sample and return noise
+    img = tf.reshape(img, (batch_size, 28, 28, 1))
+    x_small = tf.image.resize_bicubic(img, (14, 14))
+    x_small = tf.reshape(x_small, (batch_size, -1))
+    return x_small
+
+
+# In[ ]:
 
 def get_solvers(learning_rate=1e-3, beta1=0.5):
     """Create solvers for GAN training.
@@ -120,7 +280,6 @@ def get_solvers(learning_rate=1e-3, beta1=0.5):
 
 
 # In[ ]:
-
 
 def discriminator(x, y):
     """Compute discriminator score for a batch of input images.
@@ -160,7 +319,6 @@ def generator(z, y):
 
 # In[ ]:
 
-
 def gan_loss(logits_real, logits_fake):
     """Compute the GAN loss.
 
@@ -189,7 +347,6 @@ def gan_loss(logits_real, logits_fake):
 
 # In[ ]:
 
-
 def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_extra_step,              show_every=250, print_every=50, batch_size=128, num_epoch=10):
     """Train a GAN for a certain number of epochs.
 
@@ -213,13 +370,22 @@ def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_
 
             y_sample = np.zeros(shape=[batch_size, num_labels])
             y_sample[:, 5] = 1 # condition on class=5
-
-            samples = sess.run(G_sample, feed_dict={y:y_sample})
+            
+            # display the downsampled images
+            downsampled = sess.run(z, feed_dict={x: minibatch})
+            downsampled_fig = show_images(samples[:num_samples])
+            plt.show()
+            
+            samples = sess.run(G_sample, feed_dict={x: minibatch, y:y_sample})
             fig = show_images(samples[:num_samples])
             plt.show()
+            
+            
             print()
         # run a batch of data through the network
-        minibatch,minbatch_y = mnist.train.next_batch(batch_size)
+#         minibatch,minbatch_y = mnist.train.next_batch(batch_size)
+        minibatch,minbatch_y = setup_input()
+    
         _, D_loss_curr = sess.run([D_train_step, D_loss], feed_dict={x: minibatch, y:minbatch_y})
         _, G_loss_curr = sess.run([G_train_step, G_loss], feed_dict={x: minibatch, y:minbatch_y})
 
@@ -231,7 +397,7 @@ def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_
 
     y_sample = np.zeros(shape=[batch_size, num_labels])
     y_sample[:, 5] = 1 # condition on class=5
-    samples = sess.run(G_sample, feed_dict={y:y_sample})
+    samples = sess.run(G_sample, feed_dict={x: minibatch, y:y_sample})
 
     fig = show_images(samples[:16])
     plt.show()
@@ -240,7 +406,6 @@ def run_a_gan(sess, G_train_step, G_loss, D_train_step, D_loss, G_extra_step, D_
 # ## Build graph
 
 # In[ ]:
-
 
 tf.reset_default_graph()
 
@@ -259,9 +424,11 @@ x = tf.placeholder(tf.float32, [None, 784])
 y = tf.placeholder(tf.float32, shape=[None, num_labels])
 
 # random noise fed into our generator
-z = sample_noise(batch_size, noise_dim)
+# z = sample_noise(batch_size, noise_dim)
+z = downsampled_img(batch_size, x)
+z = tf.cast(z, tf.float32)
 # generated images
-G_sample = generator(z, y)
+G_sample = generator(z)
 
 with tf.variable_scope("") as scope:
     #scale images to be -1 to 1
@@ -289,8 +456,12 @@ G_extra_step = tf.get_collection(tf.GraphKeys.UPDATE_OPS, 'generator')
 
 # In[ ]:
 
-
 with get_session() as sess:
     sess.run(tf.global_variables_initializer())
     run_a_gan(sess,G_train_step,G_loss,D_train_step,D_loss,G_extra_step,D_extra_step)
+
+
+# In[ ]:
+
+
 
