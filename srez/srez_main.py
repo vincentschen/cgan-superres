@@ -22,7 +22,10 @@ tf.app.flags.DEFINE_string('checkpoint_dir', 'checkpoint',
 tf.app.flags.DEFINE_integer('checkpoint_period', 10000,
                             "Number of batches in between checkpoints")
 
-tf.app.flags.DEFINE_string('dataset', 'toy_dataset',
+# tf.app.flags.DEFINE_string('dataset', 'toy_dataset',
+#                            "Path to the dataset directory.")
+
+tf.app.flags.DEFINE_string('train_record', './datasets/celeba/celeba_train.tfrecords',
                            "Path to the dataset directory.")
 
 tf.app.flags.DEFINE_float('epsilon', 1e-8,
@@ -64,28 +67,28 @@ tf.app.flags.DEFINE_string('train_dir', 'train',
 tf.app.flags.DEFINE_integer('train_time', 20,
                             "Time in minutes to train the model")
 
-def prepare_dirs(delete_train_dir=False):
-    # Create checkpoint dir (do not delete anything)
-    if not tf.gfile.Exists(FLAGS.checkpoint_dir):
-        tf.gfile.MakeDirs(FLAGS.checkpoint_dir)
-    
-    # Cleanup train dir
-    if delete_train_dir:
-        if tf.gfile.Exists(FLAGS.train_dir):
-            tf.gfile.DeleteRecursively(FLAGS.train_dir)
-        tf.gfile.MakeDirs(FLAGS.train_dir)
-
-    # Return names of training files
-    if not tf.gfile.Exists(FLAGS.dataset) or \
-       not tf.gfile.IsDirectory(FLAGS.dataset):
-        raise FileNotFoundError("Could not find folder `%s'" % (FLAGS.dataset,))
-
-    filenames = tf.gfile.ListDirectory(FLAGS.dataset)
-    filenames = sorted(filenames)
-    random.shuffle(filenames)
-    filenames = [os.path.join(FLAGS.dataset, f) for f in filenames]
-
-    return filenames
+# def prepare_dirs(delete_train_dir=False):
+#     # Create checkpoint dir (do not delete anything)
+#     if not tf.gfile.Exists(FLAGS.checkpoint_dir):
+#         tf.gfile.MakeDirs(FLAGS.checkpoint_dir)
+#     
+#     # Cleanup train dir
+#     if delete_train_dir:
+#         if tf.gfile.Exists(FLAGS.train_dir):
+#             tf.gfile.DeleteRecursively(FLAGS.train_dir)
+#         tf.gfile.MakeDirs(FLAGS.train_dir)
+# 
+#     # Return names of training files
+#     if not tf.gfile.Exists(FLAGS.dataset) or \
+#        not tf.gfile.IsDirectory(FLAGS.dataset):
+#         raise FileNotFoundError("Could not find folder `%s'" % (FLAGS.dataset,))
+# 
+#     filenames = tf.gfile.ListDirectory(FLAGS.dataset)
+#     filenames = sorted(filenames)
+#     random.shuffle(filenames)
+#     filenames = [os.path.join(FLAGS.dataset, f) for f in filenames]
+# 
+#     return filenames
 
 
 def setup_tensorflow():
@@ -113,10 +116,10 @@ def _demo():
     sess, summary_writer = setup_tensorflow()
 
     # Prepare directories
-    filenames = prepare_dirs(delete_train_dir=False)
+    # filenames = prepare_dirs(delete_train_dir=False)
 
     # Setup async input queues
-    features, labels = srez_input.setup_inputs(sess, filenames)
+    features, labels = srez_input.setup_inputs(sess)
 
     # Create and initialize model
     [gene_minput, gene_moutput,
@@ -142,17 +145,17 @@ def _train():
     sess, summary_writer = setup_tensorflow()
 
     # Prepare directories
-    all_filenames = prepare_dirs(delete_train_dir=True)
+    # all_filenames = prepare_dirs(delete_train_dir=True)
 
     # Separate training and test sets
-    train_filenames = all_filenames[:-FLAGS.test_vectors]
-    test_filenames  = all_filenames[-FLAGS.test_vectors:]
+    # train_filenames = all_filenames[:-FLAGS.test_vectors]
+    # test_filenames  = all_filenames[-FLAGS.test_vectors:]
 
     # TBD: Maybe download dataset here
 
     # Setup async input queues
-    train_features, train_labels = srez_input.setup_inputs(sess, train_filenames)
-    test_features,  test_labels  = srez_input.setup_inputs(sess, test_filenames)
+    train_features, train_labels = srez_input.setup_inputs(sess)
+    test_features,  test_labels  = srez_input.setup_inputs(sess)
 
     # Add some noise during training (think denoising autoencoders)
     noise_level = .03

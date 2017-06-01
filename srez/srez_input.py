@@ -2,19 +2,41 @@ import tensorflow as tf
 
 FLAGS = tf.app.flags.FLAGS
 
-def setup_inputs(sess, filenames, image_size=None, capacity_factor=3):
+def setup_inputs(sess, image_size=None, capacity_factor=3):
 
     if image_size is None:
         image_size = FLAGS.sample_size
     
-    # Read each JPEG file
-    reader = tf.WholeFileReader()
-    filename_queue = tf.train.string_input_producer(filenames)
-    key, value = reader.read(filename_queue)
-    channels = 3
-    image = tf.image.decode_jpeg(value, channels=channels, name="dataset_image")
-    image.set_shape([None, None, channels])
+    filename_queue = tf.train.string_input_producer([FLAGS.train_record])
+    reader = tf.TFRecordReader()
+    _, serialized_example = reader.read(filename_queue)
+    
+    features = tf.parse_single_example(
+      serialized_example,
+      # Defaults are not specified since both keys are required.
+      features={
+        'height': tf.FixedLenFeature([], tf.int64),
+        'width': tf.FixedLenFeature([], tf.int64),
+        'depth': tf.FixedLenFeature([], tf.int64),
+        'image_raw': tf.FixedLenFeature([], tf.string)
+        })
 
+    # Convert from a scalar string tensor (whose single string has
+    # length mnist.IMAGE_PIXELS) to a uint8 tensor with shape
+    # [mnist.IMAGE_PIXELS].
+    image = tf.decode_raw(features['image_raw'], tf.uint8)
+#     annotation = tf.decode_raw(features['mask_raw'], tf.uint8)
+    
+    height = tf.cast(features['height'], tf.int32)
+    width = tf.cast(features['width'], tf.int32)
+    
+    image_shape = tf.stack([height, width, 3])
+#     annotation_shape = tf.stack([height, width, 1])
+    
+    image = tf.reshape(image, image_shape)
+#     annotation = tf.reshape(annotation, annotation_shape)
+
+    
     # Crop and other random augmentations
     image = tf.image.random_flip_left_right(image)
     image = tf.image.random_saturation(image, .95, 1.05)
