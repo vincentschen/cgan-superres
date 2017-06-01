@@ -15,6 +15,9 @@ FLAGS = tf.app.flags.FLAGS
 # Configuration (alphabetically)
 tf.app.flags.DEFINE_integer('batch_size', 16,
                             "Number of samples per batch.")
+                            
+tf.app.flags.DEFINE_integer('min_after_dequeue', 10000,
+                            "Number of samples per batch.")
 
 tf.app.flags.DEFINE_string('checkpoint_dir', 'checkpoint',
                            "Output folder where checkpoints are dumped.")

@@ -36,7 +36,6 @@ def setup_inputs(sess, image_size=None, capacity_factor=3):
     image = tf.reshape(image, image_shape)
 #     annotation = tf.reshape(annotation, annotation_shape)
 
-    
     # Crop and other random augmentations
     image = tf.image.random_flip_left_right(image)
     image = tf.image.random_saturation(image, .95, 1.05)
@@ -64,11 +63,12 @@ def setup_inputs(sess, image_size=None, capacity_factor=3):
     label   = tf.reshape(image,       [image_size,   image_size,     3])
 
     # Using asynchronous queues
-    features, labels = tf.train.batch([feature, label],
+    features, labels = tf.train.shuffle_batch([feature, label],
                                       batch_size=FLAGS.batch_size,
                                       num_threads=4,
-                                      capacity = capacity_factor*FLAGS.batch_size,
-                                      name='labels_and_features')
+                                      capacity = FLAGS.min_after_dequeue+capacity_factor*FLAGS.batch_size,
+                                      name='labels_and_features', 
+                                      min_after_dequeue=FLAGS.min_after_dequeue)
 
     tf.train.start_queue_runners(sess=sess)
       
