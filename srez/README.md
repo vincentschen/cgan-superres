@@ -25,8 +25,30 @@ Finally, the generator network relies on ResNet modules as we've found them to t
 You will need Python 3 with Tensorflow, numpy, scipy and [moviepy](http://zulko.github.io/moviepy/). See `requirements.txt` for details.
 
 ## Dataset
+1. Make sure file structure is the following (from current working directory): 
 
-After you have the required software above you will also need the `Large-scale CelebFaces Attributes (CelebA) Dataset`. The model expects the `Align&Cropped Images` version. Extract all images to a subfolder named `dataset`. I.e. `srez/dataset/lotsoffiles.jpg`.
+  <pre>
+  .
+  +-- datasets/
+  |   +-- celeba/
+  |   |   +-- aligned_cropped/
+  |   |   +-- Anno/
+  |   |   +-- list_eval_partition.txt 
+  </pre>
+
+1. Then, run the following formatting script to convert raw data and attributes into `.tfrecord` file:
+```
+python celeba_formatting.py \
+    --partition_fn ./datasets/celeba/list_eval_partition.txt \
+    --file_out ./datasets/celeba/celeba_train \
+    --fn_root ./datasets/celeba/aligned_cropped \
+    --set 0
+```
+
+  - Options 
+    - --set 0 # train 
+    - --set 1 # val
+    - --set 2 # test
 
 # Training the model
 
@@ -34,6 +56,7 @@ Training with default settings: `python3 srez_main.py --run train`. The script w
 
 After the network has trained you can also produce an animation showing the evolution of the output by running `python3 srez_main.py --run demo`.
 
-# About the author
+# Contributions
 
-[LinkedIn profile of David Garcia](https://ca.linkedin.com/in/david-garcia-70913311).
+Based on [srez](https://github.com/david-gpu/srez) by 
+[David Garcia](https://ca.linkedin.com/in/david-garcia-70913311).
