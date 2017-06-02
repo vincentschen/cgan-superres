@@ -38,12 +38,15 @@ import scipy.io.wavfile
 import scipy.ndimage
 import tensorflow as tf
 
+from getAttributes import Attributes 
 
-tf.flags.DEFINE_string("file_out", "",
+# Currently set to default for train
+tf.flags.DEFINE_string("file_out", "./datasets/celeba/celeba_train",
                        "Filename of the output .tfrecords file.")
-tf.flags.DEFINE_string("fn_root", "", "Name of root file path.")
-tf.flags.DEFINE_string("partition_fn", "", "Partition file path.")
-tf.flags.DEFINE_string("set", "", "Name of subset.")
+tf.flags.DEFINE_string("fn_root", "./datasets/celeba/aligned_cropped", "Name of root file path.")
+tf.flags.DEFINE_string("partition_fn", "./datasets/celeba/list_eval_partition.txt", "Partition file path.")
+tf.flags.DEFINE_string("set", "0", "Name of subset.")
+tf.flags.DEFINE_string("attr_filename", "./datasets/celeba/Anno/list_attr_celeba.txt", "Attributes file path.")
 
 FLAGS = tf.flags.FLAGS
 
@@ -68,6 +71,10 @@ def main():
 
     file_out = "%s.tfrecords" % FLAGS.file_out
     writer = tf.python_io.TFRecordWriter(file_out)
+    
+    # index to access attributes of each file
+    attr = Attributes(FLAGS.attr_filename).attributeMap
+    
     for example_idx, img_fn in enumerate(img_fn_list):
         if example_idx % 1000 == 0:
             print (example_idx, "/", num_examples)
