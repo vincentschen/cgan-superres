@@ -1,0 +1,5 @@
+__pycache__/
+train/
+checkpoint/
+datasets/
+venv/
