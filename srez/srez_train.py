@@ -82,9 +82,8 @@ def train_model(train_data):
     test_feature, test_label = td.sess.run([td.test_features, td.test_labels])
 
     max_iter = int(_num_examples(FLAGS.train_record)*FLAGS.num_epochs/FLAGS.batch_size)
-    print (max_iter)
     
-    while batch in range(max_iter):
+    for batch in range(max_iter):
         # batch += 1
         gene_loss = disc_real_loss = disc_fake_loss = -1.234
 

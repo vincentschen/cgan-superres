@@ -67,22 +67,22 @@ tf.app.flags.DEFINE_integer('test_vectors', 16,
 tf.app.flags.DEFINE_string('train_dir', 'train',
                            "Output folder where training logs are dumped.")
                            
-tf.app.flags.DEFINE_integer('num_epochs', 2,
+tf.app.flags.DEFINE_integer('num_epochs', 10,
                             "Number of epochs to train data.")
 
 # tf.app.flags.DEFINE_integer('train_time', 20,
 #                             "Time in minutes to train the model")
 
-# def prepare_dirs(delete_train_dir=False):
-#     # Create checkpoint dir (do not delete anything)
-#     if not tf.gfile.Exists(FLAGS.checkpoint_dir):
-#         tf.gfile.MakeDirs(FLAGS.checkpoint_dir)
-#     
-#     # Cleanup train dir
-#     if delete_train_dir:
-#         if tf.gfile.Exists(FLAGS.train_dir):
-#             tf.gfile.DeleteRecursively(FLAGS.train_dir)
-#         tf.gfile.MakeDirs(FLAGS.train_dir)
+def prepare_dirs(delete_train_dir=False):
+    # Create checkpoint dir (do not delete anything)
+    if not tf.gfile.Exists(FLAGS.checkpoint_dir):
+        tf.gfile.MakeDirs(FLAGS.checkpoint_dir)
+     
+     # Cleanup train dir
+    if delete_train_dir:
+        if tf.gfile.Exists(FLAGS.train_dir):
+            tf.gfile.DeleteRecursively(FLAGS.train_dir)
+        tf.gfile.MakeDirs(FLAGS.train_dir)
 # 
 #     # Return names of training files
 #     if not tf.gfile.Exists(FLAGS.dataset) or \
@@ -122,7 +122,7 @@ def _demo():
     sess, summary_writer = setup_tensorflow()
 
     # Prepare directories
-    # filenames = prepare_dirs(delete_train_dir=False)
+    prepare_dirs(delete_train_dir=False)
 
     # Setup async input queues
     features, labels = srez_input.setup_inputs(sess)
@@ -151,7 +151,7 @@ def _train():
     sess, summary_writer = setup_tensorflow()
 
     # Prepare directories
-    # all_filenames = prepare_dirs(delete_train_dir=True)
+    prepare_dirs(delete_train_dir=True)
 
     # Separate training and test sets
     # train_filenames = all_filenames[:-FLAGS.test_vectors]
