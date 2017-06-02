@@ -1,4 +1,4 @@
 moviepy==0.2.3.2
 numpy==1.12.1
 scipy==0.19.0
-tensorflow==1.1.0
+tensorflow-gpu==1.1.0
