@@ -38,12 +38,15 @@ import scipy.io.wavfile
 import scipy.ndimage
 import tensorflow as tf
 
+from getAttributes import Attributes 
 
-tf.flags.DEFINE_string("file_out", "",
+# Currently set to default for train
+tf.flags.DEFINE_string("file_out", "./datasets/celeba/celeba_train",
                        "Filename of the output .tfrecords file.")
-tf.flags.DEFINE_string("fn_root", "", "Name of root file path.")
-tf.flags.DEFINE_string("partition_fn", "", "Partition file path.")
-tf.flags.DEFINE_string("set", "", "Name of subset.")
+tf.flags.DEFINE_string("fn_root", "./datasets/celeba/aligned_cropped", "Name of root file path.")
+tf.flags.DEFINE_string("partition_fn", "./datasets/celeba/list_eval_partition.txt", "Partition file path.")
+tf.flags.DEFINE_string("set", "0", "Name of subset.")
+tf.flags.DEFINE_string("attr_filename", "./datasets/celeba/Anno/list_attr_celeba.txt", "Attributes file path.")
 
 FLAGS = tf.flags.FLAGS
 
@@ -56,7 +59,7 @@ def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
-def main():
+def celeba_format():
     """Main converter function."""
     # Celeb A
     with open(FLAGS.partition_fn, "r") as infile:
@@ -68,6 +71,10 @@ def main():
 
     file_out = "%s.tfrecords" % FLAGS.file_out
     writer = tf.python_io.TFRecordWriter(file_out)
+    
+    # use `attr` to index into attributes of each file
+    attr = Attributes(FLAGS.attr_filename).attributeMap
+    
     for example_idx, img_fn in enumerate(img_fn_list):
         if example_idx % 1000 == 0:
             print (example_idx, "/", num_examples)
@@ -76,13 +83,16 @@ def main():
         cols = image_raw.shape[1]
         depth = image_raw.shape[2]
         image_raw = image_raw.tostring()
+        label_male = attr[img_fn]['Male']
+        
         example = tf.train.Example(
             features=tf.train.Features(
                 feature={
                     "height": _int64_feature(rows),
                     "width": _int64_feature(cols),
                     "depth": _int64_feature(depth),
-                    "image_raw": _bytes_feature(image_raw)
+                    "image_raw": _bytes_feature(image_raw),
+                    'label_male': _int64_feature(int(label_male))
                 }
             )
         )
@@ -91,4 +101,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    celeba_format()

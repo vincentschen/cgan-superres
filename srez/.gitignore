@@ -3,3 +3,4 @@ train/
 checkpoint/
 datasets/
 venv/
+*.pyc
