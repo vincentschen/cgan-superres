@@ -59,13 +59,13 @@ def _save_checkpoint(train_data, batch):
 
     print("    Checkpoint saved")
 
-def _num_examples(tf_record_filename): 
+def _num_examples(tf_record_filename):
     c = 0
     for record in tf.python_io.tf_record_iterator(tf_record_filename):
         c += 1
-    return c 
+    return c
 
-def train_model(train_data):    
+def train_model(train_data):
     td = train_data
 
     summaries = tf.summary.merge_all()
@@ -79,10 +79,10 @@ def train_model(train_data):
     assert FLAGS.learning_rate_half_life % 10 == 0
 
     # Cache test features and labels (they are small)
-    test_feature, test_label = td.sess.run([td.test_features, td.test_labels])
+    test_feature, test_label, test_male_label = td.sess.run([td.test_features, td.test_labels, td.test_male_labels])
 
     max_iter = int(_num_examples(FLAGS.train_record)*FLAGS.num_epochs/FLAGS.batch_size)
-    
+
     for batch in range(max_iter):
         # batch += 1
         gene_loss = disc_real_loss = disc_fake_loss = -1.234
@@ -91,7 +91,7 @@ def train_model(train_data):
 
         ops = [td.gene_minimize, td.disc_minimize, td.gene_loss, td.disc_real_loss, td.disc_fake_loss]
         _, _, gene_loss, disc_real_loss, disc_fake_loss = td.sess.run(ops, feed_dict=feed_dict)
-        
+
         if batch % 10 == 0:
             # Show we are alive
             elapsed = int(time.time() - start_time)/60
@@ -99,21 +99,21 @@ def train_model(train_data):
                   (batch, max_iter, elapsed,
                    gene_loss, disc_real_loss, disc_fake_loss))
 
-            # # Finished?            
+            # # Finished?
             # current_progress = elapsed / FLAGS.train_time
             # if current_progress >= 1.0:
             #     done = True
-            
+
             # Update learning rate
             if batch % FLAGS.learning_rate_half_life == 0:
                 lrval *= .5
 
         if batch % FLAGS.summary_period == 0:
             # Show progress with test features
-            feed_dict = {td.gene_minput: test_feature}
+            feed_dict = {td.gene_minput: test_feature, td.gene_mmale_labels: test_male_label}
             gene_output = td.sess.run(td.gene_moutput, feed_dict=feed_dict)
             _summarize_progress(td, test_feature, test_label, gene_output, batch, 'out')
-            
+
         if batch % FLAGS.checkpoint_period == 0:
             # Save checkpoint
             _save_checkpoint(td, batch)

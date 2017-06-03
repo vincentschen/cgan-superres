@@ -15,7 +15,7 @@ FLAGS = tf.app.flags.FLAGS
 # Configuration (alphabetically)
 tf.app.flags.DEFINE_integer('batch_size', 16,
                             "Number of samples per batch.")
-                            
+
 tf.app.flags.DEFINE_integer('min_after_dequeue', 10000,
                             "Number of samples per batch.")
 
@@ -63,11 +63,11 @@ tf.app.flags.DEFINE_integer('random_seed', 0,
 
 tf.app.flags.DEFINE_integer('test_vectors', 16,
                             """Number of features to use for testing""")
-                            
+
 tf.app.flags.DEFINE_string('train_dir', 'train',
                            "Output folder where training logs are dumped.")
-                           
-tf.app.flags.DEFINE_integer('num_epochs', 10,
+
+tf.app.flags.DEFINE_integer('num_epochs', 500,
                             "Number of epochs to train data.")
 
 # tf.app.flags.DEFINE_integer('train_time', 20,
@@ -77,23 +77,23 @@ def prepare_dirs(delete_train_dir=False):
     # Create checkpoint dir (do not delete anything)
     if not tf.gfile.Exists(FLAGS.checkpoint_dir):
         tf.gfile.MakeDirs(FLAGS.checkpoint_dir)
-     
+
      # Cleanup train dir
     if delete_train_dir:
         if tf.gfile.Exists(FLAGS.train_dir):
             tf.gfile.DeleteRecursively(FLAGS.train_dir)
         tf.gfile.MakeDirs(FLAGS.train_dir)
-# 
+#
 #     # Return names of training files
 #     if not tf.gfile.Exists(FLAGS.dataset) or \
 #        not tf.gfile.IsDirectory(FLAGS.dataset):
 #         raise FileNotFoundError("Could not find folder `%s'" % (FLAGS.dataset,))
-# 
+#
 #     filenames = tf.gfile.ListDirectory(FLAGS.dataset)
 #     filenames = sorted(filenames)
 #     random.shuffle(filenames)
 #     filenames = [os.path.join(FLAGS.dataset, f) for f in filenames]
-# 
+#
 #     return filenames
 
 
@@ -105,7 +105,7 @@ def setup_tensorflow():
     # Initialize rng with a deterministic seed
     with sess.graph.as_default():
         tf.set_random_seed(FLAGS.random_seed)
-        
+
     random.seed(FLAGS.random_seed)
     np.random.seed(FLAGS.random_seed)
 
@@ -125,13 +125,13 @@ def _demo():
     prepare_dirs(delete_train_dir=False)
 
     # Setup async input queues
-    features, labels = srez_input.setup_inputs(sess)
+    features, labels, male_labels = srez_input.setup_inputs(sess)
 
     # Create and initialize model
     [gene_minput, gene_moutput,
      gene_output, gene_var_list,
      disc_real_output, disc_fake_output, disc_var_list] = \
-            srez_model.create_model(sess, features, labels)
+            srez_model.create_model(sess, features, labels, male_labels)
 
     # Restore variables from checkpoint
     saver = tf.train.Saver()
@@ -160,25 +160,25 @@ def _train():
     # TBD: Maybe download dataset here
 
     # Setup async input queues
-    train_features, train_labels = srez_input.setup_inputs(sess)
-    test_features,  test_labels  = srez_input.setup_inputs(sess)
+    train_features, train_labels, train_male_labels = srez_input.setup_inputs(sess)
+    test_features,  test_labels, test_male_labels  = srez_input.setup_inputs(sess)
 
     # Add some noise during training (think denoising autoencoders)
-    noise_level = .03
+    noise_level = 0 #.03 # TODO -- add noise back in
     noisy_train_features = train_features + \
                            tf.random_normal(train_features.get_shape(), stddev=noise_level)
 
     # Create and initialize model
     [gene_minput, gene_moutput,
      gene_output, gene_var_list,
-     disc_real_output, disc_fake_output, disc_var_list] = \
-            srez_model.create_model(sess, noisy_train_features, train_labels)
+     disc_real_output, disc_fake_output, disc_var_list, gene_mmale_labels] = \
+            srez_model.create_model(sess, noisy_train_features, train_labels, train_male_labels)
 
     gene_loss = srez_model.create_generator_loss(disc_fake_output, gene_output, train_features)
     disc_real_loss, disc_fake_loss = \
                      srez_model.create_discriminator_loss(disc_real_output, disc_fake_output)
     disc_loss = tf.add(disc_real_loss, disc_fake_loss, name='disc_loss')
-    
+
     (global_step, learning_rate, gene_minimize, disc_minimize) = \
             srez_model.create_optimizers(gene_loss, gene_var_list,
                                          disc_loss, disc_var_list)

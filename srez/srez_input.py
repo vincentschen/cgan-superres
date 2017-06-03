@@ -6,11 +6,11 @@ def setup_inputs(sess, image_size=None, capacity_factor=3):
 
     if image_size is None:
         image_size = FLAGS.sample_size
-    
+
     filename_queue = tf.train.string_input_producer([FLAGS.train_record])
     reader = tf.TFRecordReader()
     _, serialized_example = reader.read(filename_queue)
-    
+
     features = tf.parse_single_example(
       serialized_example,
       # Defaults are not specified since both keys are required.
@@ -27,15 +27,15 @@ def setup_inputs(sess, image_size=None, capacity_factor=3):
     # [mnist.IMAGE_PIXELS].
     image = tf.decode_raw(features['image_raw'], tf.uint8)
 #     annotation = tf.decode_raw(features['mask_raw'], tf.uint8)
-    
+
     height = tf.cast(features['height'], tf.int32)
     width = tf.cast(features['width'], tf.int32)
     depth = tf.cast(features['depth'], tf.int32)
     label_male = tf.cast(features['label_male'], tf.int32)
-    
+
     image_shape = tf.stack([height, width, depth])
 #     annotation_shape = tf.stack([height, width, 1])
-    
+
     image = tf.reshape(image, image_shape)
 #     annotation = tf.reshape(annotation, annotation_shape)
 
@@ -66,13 +66,13 @@ def setup_inputs(sess, image_size=None, capacity_factor=3):
     label   = tf.reshape(image,       [image_size,   image_size,     3])
 
     # Using asynchronous queues
-    features, labels = tf.train.shuffle_batch([feature, label],
+    features, labels, label_male = tf.train.shuffle_batch([feature, label, label_male],
                                       batch_size=FLAGS.batch_size,
                                       num_threads=4,
                                       capacity = FLAGS.min_after_dequeue+capacity_factor*FLAGS.batch_size,
-                                      name='labels_and_features', 
+                                      name='labels_and_features',
                                       min_after_dequeue=FLAGS.min_after_dequeue)
 
     tf.train.start_queue_runners(sess=sess)
-      
-    return features, labels
+
+    return features, labels, label_male

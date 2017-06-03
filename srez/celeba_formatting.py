@@ -38,7 +38,7 @@ import scipy.io.wavfile
 import scipy.ndimage
 import tensorflow as tf
 
-from getAttributes import Attributes 
+from getAttributes import Attributes
 
 # Currently set to default for train
 tf.flags.DEFINE_string("file_out", "./datasets/celeba/celeba_train",
@@ -71,10 +71,10 @@ def celeba_format():
 
     file_out = "%s.tfrecords" % FLAGS.file_out
     writer = tf.python_io.TFRecordWriter(file_out)
-    
+
     # use `attr` to index into attributes of each file
     attr = Attributes(FLAGS.attr_filename).attributeMap
-    
+
     for example_idx, img_fn in enumerate(img_fn_list):
         if example_idx % 1000 == 0:
             print (example_idx, "/", num_examples)
@@ -83,8 +83,8 @@ def celeba_format():
         cols = image_raw.shape[1]
         depth = image_raw.shape[2]
         image_raw = image_raw.tostring()
-        label_male = attr[img_fn]['Male']
-        
+        label_male = 1 #  max(0, attr[img_fn]['Male'])
+
         example = tf.train.Example(
             features=tf.train.Features(
                 feature={
