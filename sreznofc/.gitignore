@@ -1,0 +1,7 @@
+__pycache__/
+train/
+checkpoint/
+datasets/
+venv/
+*.pyc
+datasets.zip
