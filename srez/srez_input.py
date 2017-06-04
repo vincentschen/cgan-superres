@@ -31,7 +31,7 @@ def setup_inputs(sess, image_size=None, capacity_factor=3):
     height = tf.cast(features['height'], tf.int32)
     width = tf.cast(features['width'], tf.int32)
     depth = tf.cast(features['depth'], tf.int32)
-    label_male = tf.cast(features['label_male'], tf.int32)
+    label_male = tf.cast(features['label_male'], tf.float32)
 
     image_shape = tf.stack([height, width, depth])
 #     annotation_shape = tf.stack([height, width, 1])

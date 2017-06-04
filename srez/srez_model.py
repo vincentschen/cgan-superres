@@ -324,7 +324,7 @@ class Model:
 def _discriminator_model(sess, features, disc_input, male_labels):
     # Fully convolutional model
     mapsize = 3
-    layers  = [64, 128, 256, 512]
+    layers  = [64]#, 128, 256, 512]
 
     old_vars = tf.global_variables()
 
@@ -440,11 +440,13 @@ def create_model(sess, features, labels, male_labels):
     gene_mmale_labels = tf.placeholder(tf.float32, shape=[FLAGS.batch_size, ])
     # TBD: Is there a better way to instance the generator?
     with tf.variable_scope('gene') as scope:
+        # train time
         gene_output, gene_var_list = \
                     _generator_model(sess, features, labels, male_labels, channels)
 
         scope.reuse_variables()
 
+        # test time
         gene_moutput, _ = _generator_model(sess, gene_minput, labels, gene_mmale_labels, channels)
 
     # Discriminator with real data
