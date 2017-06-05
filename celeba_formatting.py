@@ -41,7 +41,7 @@ import tensorflow as tf
 from getAttributes import Attributes
 
 # Currently set to default for train
-tf.flags.DEFINE_string("file_out", "./datasets/celeba/celeba_train",
+tf.flags.DEFINE_string("file_out", "./datasets/celebA/celeba_train",
                        "Filename of the output .tfrecords file.")
 tf.flags.DEFINE_string("fn_root", "./datasets/celebA/images", "Name of root file path.")
 tf.flags.DEFINE_string("partition_fn", "./datasets/celebA/list_eval_partition.txt", "Partition file path.")
@@ -106,5 +106,5 @@ def num_examples(tf_record_filename):
     return c
 
 if __name__ == "__main__":
-    celeba_format()
-    print(num_examples(os.path.join(FLAGS.file_out, '.tfrecord')))
+#    celeba_format()
+    print(num_examples(FLAGS.file_out+'.tfrecords'))

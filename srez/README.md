@@ -36,6 +36,8 @@ You will need Python 3 with Tensorflow, numpy, scipy and [moviepy](http://zulko.
   |   |   +-- list_eval_partition.txt 
   </pre>
 
+An easy way to do this is using the `download.py` script in the root directory of this repo. 
+
 1. Then, run the following formatting script to convert raw data and attributes into `.tfrecord` file:
 ```
 python celeba_formatting.py \

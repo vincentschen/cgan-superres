@@ -28,7 +28,7 @@ tf.app.flags.DEFINE_integer('checkpoint_period', 10000,
 # tf.app.flags.DEFINE_string('dataset', 'toy_dataset',
 #                            "Path to the dataset directory.")
 
-tf.app.flags.DEFINE_string('train_record', './datasets/celeba/celeba_train.tfrecords',
+tf.app.flags.DEFINE_string('train_record', './datasets/celebA/celeba_train.tfrecords',
                            "Path to the dataset directory.")
 
 tf.app.flags.DEFINE_float('epsilon', 1e-8,
@@ -67,7 +67,7 @@ tf.app.flags.DEFINE_integer('test_vectors', 16,
 tf.app.flags.DEFINE_string('train_dir', 'train',
                            "Output folder where training logs are dumped.")
 
-tf.app.flags.DEFINE_integer('num_epochs', 5000,
+tf.app.flags.DEFINE_integer('num_epochs', 10,
                             "Number of epochs to train data.")
 
 # tf.app.flags.DEFINE_integer('train_time', 20,

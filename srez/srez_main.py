@@ -28,7 +28,7 @@ tf.app.flags.DEFINE_integer('checkpoint_period', 10000,
 # tf.app.flags.DEFINE_string('dataset', 'toy_dataset',
 #                            "Path to the dataset directory.")
 
-tf.app.flags.DEFINE_string('train_record', './datasets/celeba/celeba_train.tfrecords',
+tf.app.flags.DEFINE_string('train_record', './datasets/celebA/celeba_train.tfrecords',
                            "Path to the dataset directory.")
 
 tf.app.flags.DEFINE_float('epsilon', 1e-8,
