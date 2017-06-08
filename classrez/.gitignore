@@ -8,3 +8,4 @@ toy_dataset/
 .env
 __pycache_
 *.pyc
+.DS_Store
