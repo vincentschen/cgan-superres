@@ -1,0 +1,10 @@
+venv/
+datasets/
+.ipynb_checkpoints/
+checkpoint/
+checkpoint_64/
+train/
+toy_dataset/
+.env
+__pycache_
+*.pyc
