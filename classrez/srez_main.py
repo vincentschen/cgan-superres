@@ -16,14 +16,16 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('batch_size', 16,
                             "Number of samples per batch.")
 
-tf.app.flags.DEFINE_string('checkpoint_dir', 'checkpoint',
+tf.app.flags.DEFINE_string('checkpoint_dir', 'checkpoint_64',
                            "Output folder where checkpoints are dumped.")
 
 tf.app.flags.DEFINE_integer('checkpoint_period', 10000,
                             "Number of batches in between checkpoints")
 
-tf.app.flags.DEFINE_string('dataset', 'dataset',
+tf.app.flags.DEFINE_string('dataset', '../toy-dataset',
                            "Path to the dataset directory.")
+#tf.app.flags.DEFINE_string('dataset', '../datasets/celebA/images',
+#                           "Path to the dataset directory.")
 
 tf.app.flags.DEFINE_float('epsilon', 1e-8,
                           "Fuzz term to avoid numerical instability")
@@ -61,8 +63,11 @@ tf.app.flags.DEFINE_integer('test_vectors', 5000,
 tf.app.flags.DEFINE_string('train_dir', 'train',
                            "Output folder where training logs are dumped.")
 
-tf.app.flags.DEFINE_integer('train_time', 400,
-                            "Time in minutes to train the model")
+#tf.app.flags.DEFINE_integer('train_time', 400,
+#                            "Time in minutes to train the model")
+
+tf.app.flags.DEFINE_integer('num_epochs', 10,
+                            "Number of epochs to train data.")
 
 def prepare_dirs(delete_train_dir=False):
     # Create checkpoint dir (do not delete anything)
@@ -151,6 +156,7 @@ def _train():
     # TBD: Maybe download dataset here
 
     # Setup async input queues
+    train_filenames = all_filenames # TODO: remove after toy-dataset
     train_features, train_labels = srez_input.setup_inputs(sess, train_filenames)
     test_features,  test_labels  = srez_input.setup_inputs(sess, test_filenames)
 
