@@ -379,6 +379,7 @@ def create_class_loss(gene_output, true_output):
     class_labels = tf.rint(original_labels)
     #calculate softmax cross entropy
     loss = tf.nn.softmax_cross_entropy_with_logits(logits=gene_labels, labels=class_labels)
+    loss = tf.reduce_mean(loss)
     return loss
 
 def _generator_model(sess, features, labels, channels):

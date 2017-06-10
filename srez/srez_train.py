@@ -83,7 +83,7 @@ def train_model(train_data):
 
         feed_dict = {td.learning_rate : lrval}
 
-        ops = [td.gene_minimize, td.disc_minimize, td.gene_loss, td.disc_real_loss, td.disc_fake_loss]
+        ops = [td.gene_minimize, td.disc_minimize, td.final_gene_loss, td.disc_real_loss, td.disc_fake_loss]
         _, _, gene_loss, disc_real_loss, disc_fake_loss = td.sess.run(ops, feed_dict=feed_dict)
         
         if batch % 10 == 0:
