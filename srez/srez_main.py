@@ -22,7 +22,7 @@ tf.app.flags.DEFINE_string('checkpoint_dir', 'checkpoint',
 tf.app.flags.DEFINE_integer('checkpoint_period', 1000,
                             "Number of batches in between checkpoints")
 
-tf.app.flags.DEFINE_string('dataset', '../toy-dataset',
+tf.app.flags.DEFINE_string('dataset', '../data/celebA',
                            "Path to the dataset directory.")
 
 tf.app.flags.DEFINE_float('epsilon', 1e-8,

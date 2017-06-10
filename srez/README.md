@@ -25,30 +25,22 @@ Finally, the generator network relies on ResNet modules as we've found them to t
 You will need Python 3 with Tensorflow, numpy, scipy and [moviepy](http://zulko.github.io/moviepy/). See `requirements.txt` for details.
 
 ## Dataset
-1. Make sure file structure is the following (from current working directory): 
+1. Run `python download.py celebA` in the root directory.  
+
+Make sure file structure is the following (from current working directory): 
 
   <pre>
   .
   +-- datasets/
-  |   +-- celeba/
-  |   |   +-- aligned_cropped/
-  |   |   +-- Anno/
-  |   |   +-- list_eval_partition.txt 
+  |   +-- celebA/
+  |   |   +-- <images here>  
   </pre>
 
-1. Then, run the following formatting script to convert raw data and attributes into `.tfrecord` file:
-```
-python celeba_formatting.py \
-    --partition_fn ./datasets/celeba/list_eval_partition.txt \
-    --file_out ./datasets/celeba/celeba_train \
-    --fn_root ./datasets/celeba/aligned_cropped \
-    --set 0
-```
-
-  - Options 
-    - --set 0 # train 
-    - --set 1 # val
-    - --set 2 # test
+# Loading the checkpointed model 
+1. Make sure you have the correct `checkpoint_64/` folder. 
+1. Run `python generate_input_graph.py`
+1. Run `python freeze_graph.py --input_checkpoint=checkpoint_64/model.ckpt --output_node_names=y_pred --input_graph=checkpoint_64/input_graph --output_graph=checkpoint_64/frozen_graph.pb` 
+1. Notice that `checkpoint_64/` should now have `frozen_graph.pb`, which you will need for training. 
 
 # Training the model
 
