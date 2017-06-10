@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-
+from tensorflow.python.platform import gfile
 FLAGS = tf.app.flags.FLAGS
 
 class Model:
@@ -357,6 +357,30 @@ def _discriminator_model(sess, features, disc_input):
 
     return model.get_output(), disc_vars
 
+# true_output should correspond to "labels" in srez_main
+def create_class_loss(gene_output, true_output):
+    #import classifier
+    #hook up graph
+    #saver = tf.train.import_meta_graph('checkpoint_64/model.ckpt.meta')
+    #class_graph=tf.get_default_graph()
+    f = gfile.FastGFile("checkpoint_64/frozen_graph.pb",'rb')
+    class_graph = tf.GraphDef()
+    class_graph.ParseFromString(f.read())
+    y_pred, x = tf.import_graph_def(class_graph, return_elements=['y_pred:0', 'x:0'], name='')
+    #y_pred = class_graph.get_tensor_by_name("y_pred:0")
+    #x = class_graph.get_tensor_by_name("x:0")
+    true_output = tf.reshape(true_output, [FLAGS.batch_size, -1])
+    #calculate first labels with true_output (all in tensors)
+    original_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:true_output})
+    gene_output = tf.reshape(gene_output, [FLAGS.batch_size, -1])
+    #calculate labels of generated output
+    gene_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:gene_output})
+    #round to nearest integer to get labels (i.e. [.3,.7] -> [0,1])
+    class_labels = tf.rint(original_labels)
+    #calculate softmax cross entropy
+    loss = tf.nn.softmax_cross_entropy_with_logits(logits=gene_labels, labels=class_labels)
+    return loss
+
 def _generator_model(sess, features, labels, channels):
     # Upside-down all-convolutional resnet
 
@@ -447,26 +471,6 @@ def _downscale(images, K):
                               padding='SAME')
     return downscaled
 
-# true_output should correspond to "labels" in srez_main
-def create_class_loss(gene_output, true_output):
-    #import classifier
-    #hook up graph
-    saver = tf.train.import_meta_graph('checkpoint_64/model.ckpt.meta')
-    
-    y_pred = class_graph.get_tensor_by_name("y_pred:0")
-    x = class_graph.get_tensor_by_name("x:0")
-    true_output = tf.reshape(true_output, [FLAGS.batch_size, -1])
-    #calculate first labels with true_output (all in tensors)
-    original_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:true_output})
-    gene_output = tf.reshape(gene_output, [FLAGS.batch_size, -1])
-    #calculate labels of generated output
-    gene_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:gene_output})
-    #round to nearest integer to get labels (i.e. [.3,.7] -> [0,1])
-    class_labels = tf.rint(original_labels)
-    #calculate softmax cross entropy
-    loss = tf.nn.softmax_cross_entropy_with_logits(logits=gene_labels, labels=class_labels)
-    return loss
-
 def create_generator_loss(disc_output, gene_output, features):
     # I.e. did we fool the discriminator?
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=disc_output, labels=tf.ones_like(disc_output))
@@ -486,6 +490,8 @@ def create_generator_loss(disc_output, gene_output, features):
 
 def create_discriminator_loss(disc_real_output, disc_fake_output):
     # I.e. did we correctly identify the input as real or not?
+    #print("real output in loss", disc_real_output)
+    #print("fake output in loss", disc_fake_output)
     cross_entropy_real = tf.nn.sigmoid_cross_entropy_with_logits(logits=disc_real_output, labels=tf.ones_like(disc_real_output))
     disc_real_loss     = tf.reduce_mean(cross_entropy_real, name='disc_real_loss')
     

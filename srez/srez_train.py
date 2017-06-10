@@ -6,7 +6,7 @@ import time
 
 FLAGS = tf.app.flags.FLAGS
 
-def _summarize_progress(train_data, feature, label, gene_output, batch, suffix, max_samples=8):
+def _summarize_progress(train_data, feature, label, gene_output, batch, suffix, max_samples=15):
     td = train_data
 
     size = [label.shape[1], label.shape[2]]
