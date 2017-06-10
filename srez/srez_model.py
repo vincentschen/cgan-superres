@@ -447,6 +447,26 @@ def _downscale(images, K):
                               padding='SAME')
     return downscaled
 
+# true_output should correspond to "labels" in srez_main
+def create_class_loss(gene_output, true_output):
+    #import classifier
+    #hook up graph
+    saver = tf.train.import_meta_graph('checkpoint_64/model.ckpt.meta')
+    
+    y_pred = class_graph.get_tensor_by_name("y_pred:0")
+    x = class_graph.get_tensor_by_name("x:0")
+    true_output = tf.reshape(true_output, [FLAGS.batch_size, -1])
+    #calculate first labels with true_output (all in tensors)
+    original_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:true_output})
+    gene_output = tf.reshape(gene_output, [FLAGS.batch_size, -1])
+    #calculate labels of generated output
+    gene_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:gene_output})
+    #round to nearest integer to get labels (i.e. [.3,.7] -> [0,1])
+    class_labels = tf.rint(original_labels)
+    #calculate softmax cross entropy
+    loss = tf.nn.softmax_cross_entropy_with_logits(logits=gene_labels, labels=class_labels)
+    return loss
+
 def create_generator_loss(disc_output, gene_output, features):
     # I.e. did we fool the discriminator?
     cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=disc_output, labels=tf.ones_like(disc_output))
