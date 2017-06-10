@@ -34,7 +34,7 @@ tf.app.flags.DEFINE_string('run', 'demo',
 tf.app.flags.DEFINE_float('gene_l1_factor', .90,
                           "Multiplier for generator L1 loss term")
 
-tf.app.flags.DEFINE_float('gene_class_factor', .50,
+tf.app.flags.DEFINE_float('gene_class_factor', .90,
                           "Multiplier for generator L1 loss term")
 
 tf.app.flags.DEFINE_float('learning_beta1', 0.5,

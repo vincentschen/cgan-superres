@@ -371,11 +371,12 @@ def create_class_loss(gene_output, true_output):
     #x = class_graph.get_tensor_by_name("x:0")
     true_output = tf.reshape(true_output, [FLAGS.batch_size, -1])
     #calculate first labels with true_output (all in tensors)
-    original_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:true_output})
+    #original_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:true_output}) #TODO: put back in
     gene_output = tf.reshape(gene_output, [FLAGS.batch_size, -1])
     #calculate labels of generated output
     gene_labels = tf.contrib.graph_editor.graph_replace(y_pred, {x:gene_output})
     #round to nearest integer to get labels (i.e. [.3,.7] -> [0,1])
+    original_labels = tf.constant(FLAGS.batch_size*[[1,0]], dtype=tf.float32)# TODO: remove later; experiment
     class_labels = tf.rint(original_labels)
     #calculate softmax cross entropy
     loss = tf.nn.softmax_cross_entropy_with_logits(logits=gene_labels, labels=class_labels)
