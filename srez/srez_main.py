@@ -10,10 +10,8 @@ import numpy.random
 
 import tensorflow as tf
 
-#tf.device('/gpu:0')
-
 FLAGS = tf.app.flags.FLAGS
-print(tf.__version__)
+
 # Configuration (alphabetically)
 tf.app.flags.DEFINE_integer('batch_size', 16,
                             "Number of samples per batch.")
@@ -36,6 +34,9 @@ tf.app.flags.DEFINE_string('run', 'demo',
 tf.app.flags.DEFINE_float('gene_l1_factor', .90,
                           "Multiplier for generator L1 loss term")
 
+tf.app.flags.DEFINE_float('gene_class_factor', .50,
+                          "Multiplier for generator L1 loss term")
+
 tf.app.flags.DEFINE_float('learning_beta1', 0.5,
                           "Beta1 parameter used for AdamOptimizer")
 
@@ -51,7 +52,7 @@ tf.app.flags.DEFINE_bool('log_device_placement', False,
 tf.app.flags.DEFINE_integer('sample_size', 64,
                             "Image sample size in pixels. Range [64,128]")
 
-tf.app.flags.DEFINE_integer('summary_period', 1000,
+tf.app.flags.DEFINE_integer('summary_period', 500,
                             "Number of batches between summary data dumps")
 
 tf.app.flags.DEFINE_integer('random_seed', 0,
@@ -65,7 +66,7 @@ tf.app.flags.DEFINE_string('train_dir', 'train',
 
 tf.app.flags.DEFINE_integer('num_epochs', 10,
                             "Number of epochs to train data.")
-
+                            
 def prepare_dirs(delete_train_dir=False):
     # Create checkpoint dir (do not delete anything)
     if not tf.gfile.Exists(FLAGS.checkpoint_dir):
@@ -127,10 +128,10 @@ def _demo():
             srez_model.create_model(sess, features, labels)
 
     # Restore variables from checkpoint
-    saver = tf.train.Saver()
-    filename = 'checkpoint_new.txt'
-    filename = os.path.join(FLAGS.checkpoint_dir, filename)
-    saver.restore(sess, filename)
+    # saver = tf.train.Saver()
+    # filename = 'checkpoint_new.txt'
+    # filename = os.path.join(FLAGS.checkpoint_dir, filename)
+    # saver.restore(sess, filename)
 
     # Execute demo
     srez_demo.demo1(sess)
@@ -168,15 +169,15 @@ def _train():
             srez_model.create_model(sess, noisy_train_features, train_labels)
 
     gene_loss = srez_model.create_generator_loss(disc_fake_output, gene_output, train_features)
-    #final_gene_loss = tf.add((1.0 - FLAGS.gene_class_factor)*gene_loss \
-    #    + FLAGS.gene_class_factor*class_loss)
+    class_loss = srez_model.create_class_loss(gene_output, train_labels)
+    final_gene_loss = tf.add((1.0 - FLAGS.gene_class_factor)*gene_loss, FLAGS.gene_class_factor*class_loss)
 
     disc_real_loss, disc_fake_loss = \
                      srez_model.create_discriminator_loss(disc_real_output, disc_fake_output)
     disc_loss = tf.add(disc_real_loss, disc_fake_loss, name='disc_loss')
     
     (global_step, learning_rate, gene_minimize, disc_minimize) = \
-            srez_model.create_optimizers(gene_loss, gene_var_list,
+            srez_model.create_optimizers(final_gene_loss, gene_var_list,
                                          disc_loss, disc_var_list)
 
     # Train model
