@@ -75,7 +75,9 @@ def train_model(train_data):
     # Cache test features and labels (they are small)
     test_feature, test_label = td.sess.run([td.test_features, td.test_labels])
 
-    while not done:
+    num_examples = len(td.train_filenames) 
+    max_iter = int(num_examples*FLAGS.num_epochs/FLAGS.batch_size)
+    for batch in range(max_iter):
         batch += 1
         gene_loss = disc_real_loss = disc_fake_loss = -1.234
 
@@ -87,14 +89,9 @@ def train_model(train_data):
         if batch % 10 == 0:
             # Show we are alive
             elapsed = int(time.time() - start_time)/60
-            print('Progress[%3d%%], ETA[%4dm], Batch [%4d], G_Loss[%3.3f], D_Real_Loss[%3.3f], D_Fake_Loss[%3.3f]' %
-                  (int(100*elapsed/FLAGS.train_time), FLAGS.train_time - elapsed,
-                   batch, gene_loss, disc_real_loss, disc_fake_loss))
-
-            # Finished?            
-            current_progress = elapsed / FLAGS.train_time
-            if current_progress >= 1.0:
-                done = True
+            print('Progress[%d/%d], Elapsed[%4dm], G_Loss[%3.3f], D_Real_Loss[%3.3f], D_Fake_Loss[%3.3f]' %
+                  (batch, max_iter, elapsed,
+                   gene_loss, disc_real_loss, disc_fake_loss))
             
             # Update learning rate
             if batch % FLAGS.learning_rate_half_life == 0:
