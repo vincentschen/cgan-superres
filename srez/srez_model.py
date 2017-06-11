@@ -361,9 +361,9 @@ def _discriminator_model(sess, features, disc_input):
 def create_class_loss(gene_output, true_output):
     #import classifier
     #hook up graph
-    #saver = tf.train.import_meta_graph('checkpoint_64/model.ckpt.meta')
+    #saver = tf.train.import_meta_graph('checkpoint_eye/model.ckpt.meta')
     #class_graph=tf.get_default_graph()
-    f = gfile.FastGFile("checkpoint_64/frozen_graph.pb",'rb')
+    f = gfile.FastGFile("checkpoint_eye/frozen_graph.pb",'rb')
     class_graph = tf.GraphDef()
     class_graph.ParseFromString(f.read())
     y_pred, x = tf.import_graph_def(class_graph, return_elements=['y_pred:0', 'x:0'], name='')
