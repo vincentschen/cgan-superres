@@ -19,9 +19,9 @@ def extractLosses(lines):
   D_Losses = []
   i = 0
   for line in lines:
-    G_Loss = float(line[3].replace('G_Loss[', '').replace('],', ''))
-    D_Real_Loss = float(line[4].replace('D_Real_Loss[', '').replace('],', ''))
-    D_Fake_Loss = float(line[5].replace('D_Fake_Loss[', '').replace(']', ''))
+    G_Loss = float(line[0].replace('G_Loss[', '').replace('],', ''))
+    D_Real_Loss = float(line[1].replace('D_Real_Loss[', '').replace('],', ''))
+    D_Fake_Loss = float(line[2].replace('D_Fake_Loss[', '').replace(']', ''))
     D_Loss = D_Real_Loss + D_Fake_Loss
     if i % print_every == 0:
       G_Losses.append(G_Loss)
