@@ -1,0 +1,110 @@
+VANILLA
+INDEX 5
+2
+2
+2
+2
+correctness for original test image (full resolution)True
+correctness for vanilla generated test images (superresolved)True
+[ 0.  0.  1.  0.  0.  0.  0.  0.  0.  0.]
+probability distribution for original test image (full resolution)[ -1.08495831  -5.00081396  22.52109528   0.69462121  -4.82849836
+ -10.99216843  -6.07933521   0.86702448   0.16017044  -3.88314152]
+probability distribution for vanilla generated test images (superresolved)[  3.55814886  -6.42998838  29.65828705 -11.36066628  -4.6179347
+  -9.49038315  -9.65110207   3.49167514  -9.64084339 -22.49917412]
+
+
+INDEX 8
+1
+1
+1
+1
+correctness for original test image (full resolution)True
+correctness for vanilla generated test images (superresolved)True
+[ 0.  1.  0.  0.  0.  0.  0.  0.  0.  0.]
+probability distribution for original test image (full resolution)[ -1.8488183   16.15074921  -4.92728329  -9.57453346  -1.89766765
+  -6.98449183  -3.09730864   0.47776869   0.77211243  -6.12164545]
+probability distribution for vanilla generated test images (superresolved)[-13.24604511  19.0275898   -5.38540268  -7.46335411  -1.67647374
+  -1.36493015  -5.65703011   6.54390192 -14.187253    -7.93429327]
+
+
+INDEX 15
+9
+7 -- predicted_val_vanilla
+9
+9
+correctness for original test image (full resolution)True
+correctness for vanilla generated test images (superresolved)False
+[ 0.  0.  0.  0.  0.  0.  0.  0.  0.  1.]
+probability distribution for original test image (full resolution)[ -9.34513283  -6.31262827  -5.47062492  -0.68388867   4.15287113
+  -2.5474422  -11.17828751  -4.48981047  -0.418872    21.24710846]
+probability distribution for vanilla generated test images (superresolved)[-16.51182365   9.04320908   0.14537644   8.7373085  -10.65416145
+   1.30239582  -9.98423767  12.40083694 -19.31983376  -2.2685678 ]
+
+INDEX 6
+3
+2
+3
+3
+correctness for original test image (full resolution)True
+correctness for vanilla generated test images (superresolved)False
+[ 0.  0.  0.  1.  0.  0.  0.  0.  0.  0.]
+probability distribution for original test image (full resolution)[ -5.86372423  -0.76783997   3.00862646  12.72345924  -8.06190681
+  -3.18172431  -5.04230452  -4.2499671    1.19091916  -1.61310005]
+probability distribution for vanilla generated test images (superresolved)[-13.9007473    9.41771507  14.59153271   1.80625224 -11.26290894
+   0.43364778  -9.17122364   9.4087944  -18.82554626 -12.46636677]
+
+
+
+CGAN
+INDEX 5
+2
+2
+2
+2
+correctness for original test image (full resolution)True
+correctness for CGAN generated test images (superresolved)True
+[ 0.  0.  1.  0.  0.  0.  0.  0.  0.  0.]
+probability distribution for original test image (full resolution)[ -1.08495831  -5.00081396  22.52109528   0.69462121  -4.82849836
+ -10.99216843  -6.07933521   0.86702448   0.16017044  -3.88314152]
+probability distribution for CGAN generated test images (superresolved)[-16.82253265   6.92909575  23.74946594  -0.42389017  -1.95129144
+  -6.80550241  -3.83550811  15.7230854  -16.49821281 -22.82527351]
+
+INDEX 8
+1
+1
+1
+1
+correctness for original test image (full resolution)True
+correctness for CGAN generated test images (superresolved)True
+[ 0.  1.  0.  0.  0.  0.  0.  0.  0.  0.]
+probability distribution for original test image (full resolution)[ -1.8488183   16.15074921  -4.92728329  -9.57453346  -1.89766765
+  -6.98449183  -3.09730864   0.47776869   0.77211243  -6.12164545]
+probability distribution for CGAN generated test images (superresolved)[-12.15886879  28.97768211  -3.56933737  -9.88887978   1.83826745
+  -9.14447689  -0.31959596   1.24755168 -16.53923035 -18.84681702]
+
+
+INDEX 15
+9
+9
+9
+9
+correctness for original test image (full resolution)True
+correctness for CGAN generated test images (superresolved)True
+[ 0.  0.  0.  0.  0.  0.  0.  0.  0.  1.]
+probability distribution for original test image (full resolution)[ -9.34513283  -6.31262827  -5.47062492  -0.68388867   4.15287113
+  -2.5474422  -11.17828751  -4.48981047  -0.418872    21.24710846]
+probability distribution for CGAN generated test images (superresolved)[-19.36888313   8.17684937  -9.83010387  -4.41987276  11.30360603
+   0.25215104  -9.15894699  -1.29247308 -18.33153915  12.64255619]
+
+INDEX 6
+3
+3
+3
+3
+correctness for original test image (full resolution)True
+correctness for CGAN generated test images (superresolved)True
+[ 0.  0.  0.  1.  0.  0.  0.  0.  0.  0.]
+probability distribution for original test image (full resolution)[ -5.86372423  -0.76783997   3.00862646  12.72345924  -8.06190681
+  -3.18172431  -5.04230452  -4.2499671    1.19091916  -1.61310005]
+probability distribution for CGAN generated test images (superresolved)[-19.59989738  10.35560513   6.84600353  10.71452427  -8.02385998
+   2.56267071 -11.03740311   0.49027279 -21.42566872  -8.254035  ]
