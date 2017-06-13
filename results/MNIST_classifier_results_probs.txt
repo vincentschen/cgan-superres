@@ -1,4 +1,4 @@
-VANILLA
+CGAN
 
 INDEX 6
 index 6
@@ -60,7 +60,7 @@ probability distribution for CGAN generated test images (superresolved)[  2.3969
    6.88907742e-12   5.37036744e-14   1.04678180e-12   3.26621957e-04
    3.31522781e-18   5.92523851e-21]
 
-CGAN
+VANILLA
 INDEX 6
 index 6
 predicted original 3
