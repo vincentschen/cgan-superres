@@ -1,5 +1,0 @@
-numpy==1.12.1
-sugartensor==1.0.0.2
-tensorflow-gpu==1.0.0
-tqdm==4.11.2
-matplotlib==2.0.2
